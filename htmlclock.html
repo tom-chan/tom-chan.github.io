@@ -2,7 +2,7 @@
 <html>
 <body>
 
-<canvas id="canvas" width="900" height="900"
+<canvas id="canvas" width="950" height="950"
 style="background-color:#333">
 </canvas>
 
@@ -14,12 +14,18 @@ var lastDrawnMinute = -1;
 ctx.translate(radius, radius);
 radius = radius * 0.90;
 drawClock();
-setInterval(drawTime, 1000);
+setInterval(drawClock, 1000);
 
 function drawClock() {
-  drawFace(ctx, radius);
-  drawNumbers(ctx, radius);
-  drawTime(ctx, radius);
+  var now = new Date();
+  var minute = now.getMinutes();
+  if (minute != lastDrawnMinute) {
+    var hour = now.getHours();
+    drawFace(ctx, radius);
+    drawNumbers(ctx, radius);
+    drawTime(ctx, radius, hour, minute);
+    lastDrawnMinute = minute;
+  }
 }
 
 function drawFace(ctx, radius) {
@@ -59,32 +65,26 @@ function drawNumbers(ctx, radius) {
   }
 }
 
-function drawTime(ctx, radius){
-  var now = new Date();
-  var hour = now.getHours();
-  var minute = now.getMinutes();
-  if (minute != lastDrawnMinute) {
-    //hour
-    hour=hour%12;
-    hour=(hour*Math.PI/6)+
-    (minute*Math.PI/(6*60));
-    drawHand(ctx, hour, radius*0.5, radius*0.07);
-    //minute
-    minute=(minute*Math.PI/30);
-    drawHand(ctx, minute, radius*0.8, radius*0.07);
-    minute = lastDrawnMinute;
-  }
+function drawTime(ctx, radius, hour, minute){
+  //hour
+  hour=hour%12;
+  hour=(hour*Math.PI/6)+
+  (minute*Math.PI/(6*60));
+  drawHand(ctx, hour, radius*0.5, radius*0.07);
+  //minute
+  minute=(minute*Math.PI/30);
+  drawHand(ctx, minute, radius*0.75, radius*0.07);
 }
 
 function drawHand(ctx, pos, length, width) {
-    ctx.beginPath();
-    ctx.lineWidth = width;
-    ctx.lineCap = "round";
-    ctx.moveTo(0,0);
-    ctx.rotate(pos);
-    ctx.lineTo(0, -length);
-    ctx.stroke();
-    ctx.rotate(-pos);
+  ctx.beginPath();
+  ctx.lineWidth = width;
+  ctx.lineCap = "round";
+  ctx.moveTo(0,0);
+  ctx.rotate(pos);
+  ctx.lineTo(0, -length);
+  ctx.stroke();
+  ctx.rotate(-pos);
 }
 </script>
 
