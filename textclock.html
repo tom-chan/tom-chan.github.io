@@ -2,7 +2,7 @@
 <html>
 <body>
 
-<canvas id="canvas" width="970" height="970"
+<canvas id="canvas" width="970" height="1200"
 style="background-color:#FFF">
 </canvas>
 
@@ -34,14 +34,14 @@ function drawFace(ctx) {
 }
 
 function drawTime(ctx, hour, minute){
-  ctx.font = "600px Verdana";
+  ctx.font = "700px Verdana";
   ctx.fillStyle = 'black';
   // hour
   // hour=hour%12; // 12 hour clock
   // 0-pad the hour and minute string
-  ctx.fillText(("0" + hour).slice(-2), -400, -20);
+  ctx.fillText(("0" + hour).slice(-2), -560, -30);
   // minute
-  ctx.fillText(("0" + minute).slice(-2), -400, 470);
+  ctx.fillText(("0" + minute).slice(-2), -560, 570);
 }
 
 </script>
