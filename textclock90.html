@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<body>
+
+<canvas id="canvas" width="970" height="1150"
+style="background-color:#FFF">
+</canvas>
+
+<script>
+var canvas = document.getElementById("canvas");
+var ctx = canvas.getContext("2d");
+var lastDrawnMinute = -1;
+ctx.translate(970, 0);
+ctx.rotate(Math.PI / 2); // 90 degrees
+drawClock();
+setInterval(drawClock, 1000);
+
+function drawClock() {
+  var now = new Date();
+  var minute = now.getMinutes();
+  if (minute != lastDrawnMinute) {
+    drawFace(ctx);
+    var hour = now.getHours();
+    drawTime(ctx, hour, minute);
+    lastDrawnMinute = minute;
+  }
+}
+
+function drawFace(ctx) {
+  ctx.beginPath();
+  ctx.fillStyle = 'white';
+  ctx.fillRect(-canvas.width, -canvas.height, 2*canvas.width, 2*canvas.height);
+}
+
+function drawTime(ctx, hour, minute){
+  ctx.font = "375px Verdana";
+  ctx.fillStyle = 'black';
+  // hour
+  // hour=hour%12; // 12 hour clock
+  // 0-pad the hour and minute string
+  ctx.fillText((("0" + hour).slice(-2)) + (("0" + minute).slice(-2)), -10, 300);
+  // minute
+  // ctx.fillText(("0" + minute).slice(-2), 0, 1130);
+}
+
+</script>
+<p>
+<a href = "htmlclock.html">Round clock</a>
+</body>
+</html>
+
