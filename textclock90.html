@@ -10,8 +10,8 @@ style="background-color:#FFF">
 var canvas = document.getElementById("canvas");
 var ctx = canvas.getContext("2d");
 var lastDrawnMinute = -1;
-ctx.translate(970, 0);
-ctx.rotate(Math.PI / 2); // 90 degrees
+ctx.translate(0, 1200);
+ctx.rotate(Math.PI / 180 * 270);
 drawGrid(ctx);
 // drawClock();
 setInterval(drawClock, 5000);
