@@ -41,12 +41,12 @@ function drawFace(ctx) {
 }
 
 function drawTime(ctx, hour, minute){
-  ctx.font = "450px Verdana";
+  ctx.font = "540px Verdana";
   ctx.fillStyle = 'black';
   // hour
   // hour=hour%12; // 12 hour clock
   // 0-pad the hour and minute string
-  ctx.fillText((("0" + hour).slice(-2)) + (("0" + minute).slice(-2)), -10, 365);
+  ctx.fillText((("0" + hour).slice(-2)) + (("0" + minute).slice(-2)), -10, 385);
   // minute
   // ctx.fillText(("0" + minute).slice(-2), 0, 1130);
 }
