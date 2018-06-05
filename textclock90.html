@@ -12,8 +12,9 @@ var ctx = canvas.getContext("2d");
 var lastDrawnMinute = -1;
 ctx.translate(970, 0);
 ctx.rotate(Math.PI / 2); // 90 degrees
-drawClock();
-setInterval(drawClock, 1000);
+drawGrid(ctx);
+// drawClock();
+setInterval(drawClock, 5000);
 
 function drawClock() {
   var now = new Date();
@@ -26,19 +27,26 @@ function drawClock() {
   }
 }
 
+function drawGrid(ctx) {
+  ctx.beginPath();
+  ctx.fillStyle = 'grey';
+  for (i = 1; i <= 12; i++) {
+    ctx.strokeRect(0, 0, i*100, i*100);
+  }
+}
 function drawFace(ctx) {
   ctx.beginPath();
   ctx.fillStyle = 'white';
-  ctx.fillRect(-canvas.width, -canvas.height, 2*canvas.width, 2*canvas.height);
+  ctx.fillRect(0, 0, canvas.height, canvas.width);
 }
 
 function drawTime(ctx, hour, minute){
-  ctx.font = "375px Verdana";
+  ctx.font = "450px Verdana";
   ctx.fillStyle = 'black';
   // hour
   // hour=hour%12; // 12 hour clock
   // 0-pad the hour and minute string
-  ctx.fillText((("0" + hour).slice(-2)) + (("0" + minute).slice(-2)), -10, 300);
+  ctx.fillText((("0" + hour).slice(-2)) + (("0" + minute).slice(-2)), -10, 365);
   // minute
   // ctx.fillText(("0" + minute).slice(-2), 0, 1130);
 }
