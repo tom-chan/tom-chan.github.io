@@ -2,17 +2,14 @@
 <html>
 <body>
 
-<canvas id="canvas" width="970" height="1200"
+<canvas id="canvas" width="970" height="1150"
 style="background-color:#FFF">
 </canvas>
 
 <script>
 var canvas = document.getElementById("canvas");
 var ctx = canvas.getContext("2d");
-var radius = canvas.height / 2;
 var lastDrawnMinute = -1;
-ctx.translate(radius, radius);
-radius = radius * 0.90;
 drawClock();
 setInterval(drawClock, 1000);
 
@@ -39,9 +36,9 @@ function drawTime(ctx, hour, minute){
   // hour
   // hour=hour%12; // 12 hour clock
   // 0-pad the hour and minute string
-  ctx.fillText(("0" + hour).slice(-2), -560, -30);
+  ctx.fillText(("0" + hour).slice(-2), 0, 540);
   // minute
-  ctx.fillText(("0" + minute).slice(-2), -560, 570);
+  ctx.fillText(("0" + minute).slice(-2), 0, 1130);
 }
 
 </script>
