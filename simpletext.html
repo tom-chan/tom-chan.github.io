@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<body onload="startTime()">
+<style>
+div {
+  font-family: verdana;
+  font-size: 150px;
+}
+</style>
+<script>
+function startTime() {
+  var now = new Date();
+  var h = now.getHours();
+  var m = now.getMinutes();
+  h = checkTime(h);
+  m = checkTime(m);
+  document.getElementById('txt').innerHTML =
+    h + "" + m;
+  var t = setTimeout(startTime, 5000);
+}
+
+function checkTime(i) {
+  if (i < 10) {i = "0" + i};  // add zero in front of numbers < 10
+  return i;
+}
+</script>
+<div id="txt"></div>
+<a href = "htmlclock.html">Round clock</a>
+</body>
+</html>
+
