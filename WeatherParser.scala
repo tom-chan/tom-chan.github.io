@@ -9,4 +9,8 @@ object WeatherParser extends App {
   maxTemps.foreach(println)
   println("min temps for the next 4 days")
   minTemps.foreach(println)
+  val iconsXml = xml \\ "data" \\ "parameters" \\ "conditions-icon" \ "icon-link"
+  val iconsText = iconsXml.map(_.text.split("/").last.replaceAll("[0-9]*.jpg", ""))
+  iconsText.foreach(println)
+
 }

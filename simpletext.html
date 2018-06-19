@@ -2,12 +2,13 @@
 <html>
 <body onload="startTime()">
 <style>
-div {
+#txt {
   font-family: verdana;
-  font-size: 150px;
+  font-size: 440px;
 }
 </style>
 <script>
+var first = 1;
 function startTime() {
   var now = new Date();
   var h = now.getHours();
@@ -16,7 +17,12 @@ function startTime() {
   m = checkTime(m);
   document.getElementById('txt').innerHTML =
     h + "" + m;
-  var t = setTimeout(startTime, 5000);
+  // load weather at 4am or on page load
+  if (first || (h == 4 && m == 0)) {
+    first = 0;
+    document.getElementById('weather').innerHTML = "<iframe src='weather.html'></iframe>";
+  }
+  var t = setTimeout(startTime, 60000);
 }
 
 function checkTime(i) {
@@ -25,7 +31,7 @@ function checkTime(i) {
 }
 </script>
 <div id="txt"></div>
-<a href = "htmlclock.html">Round clock</a>
+<div id="weather"></div>
 </body>
 </html>
 
