@@ -40,97 +40,91 @@ const int configpin = 10;                                     // Reset Pin
 String volumioServer = "http://192.168.123.100/api/v1/commands/?cmd="; // with http prefix and ends with cmd=
 String volumioPlaylistCmd = "playplaylist&name=Playlist";     // n=[0..9] to be appended
 
-const char *playlistIRCodeAlt[] = {
-  "400401009899", // 0
-  "400401000809", // 1
-  "400401008889", // 2
-  "400401004849", // 3
-  "40040100C8C9", // 4
-  "400401002829", // 5
-  "40040100A8A9", // 6
-  "400401006869", // 7
-  "40040100E8E9", // 8
-  "400401001819", // 9
-  "400401900B9A", // -/#
-  "400401904FDE", // Netflix
-  "40040100BCBD", // power
-  "400401000405", // vol up
-  "400401008485", // vol down
-  "400401002C2D", // CH up
-  "40040100ACAD", // CH down
-  "400401004C4D", // mute
-  "400401900392", // play
-  "400401903BAA", // prev
-  "40040190BB2A", // next
-  "400401908312", // pause
-  "4004019043D2", // stop
-  "40040190D544", // Media player
-  "400401003534", // eHelp
-  "40040100ECED", // LAST
-  "400401002B2A", // return
-  "40040190E574", // OPTION
-  "400401005253", // UP
-  "40040100D2D3", // DOWN
-  "400401007273", // LEFT
-  "40040100F2F3", // RIGHT
-  "400401009293", // OK
-  "40040190F160", // APPS
-  "40040190A938", // HOME
-  "40040100A0A1", // INPUT
-  "400401000E0F", // R
-  "400401008E8F", // G
-  "400401004E4F", // B
-  "40040100CECF", // Y
-  "400401009C9D", // INFO
-  "4004019059C8", // EXIT
-  "400401004A4B", // MENU
-  "400401008C8D", // SURROUND
-  "4004019075E4", // FAVORITE
-  "400401207B5A", // FORMAT
-  "40040100F0F1", // SLEEP
-  "40040100B9B8", // CC
-  "40040100CCCD" // SAP
+// { IR code, action, details }
+// sorted by IR code
+// "400401" prefix - Panasonic remote
+// "FF" prefix - small remote
+// action:-
+// "P" -- play playlist, prefixed by "Playlist"
+// "N" -- fire IR of type "NEC"
+// "V" -- volumio command other than play playlist
+// "W" -- power on / off sequence = power + 3s delay + switch to HDMI
+const int CODE = 0;
+const int ACTION = 1;
+const int DETAILS = 2;
+const char *codeAction[][3] = {
+  {"400401000405", "N", "1EE17887"}, // vol up (speaker)
+  {"400401000809", "P", "1"}, // 1
+  {"400401000E0F", "P", "R"}, // R
+  {"400401001819", "P", "9"}, // 9
+  {"400401002829", "P", "5"}, // 5
+  {"400401002B2A", "V", "repeat&toggle"}, // return = repeat
+  {"400401002C2D", "V", "volume&volume=plus"}, // CH up = vol up (Volumio)
+  {"400401003534", "V", "random&toggle"}, // eHelp = shuffle
+  {"400401004849", "P", "3"}, // 3
+  {"400401004A4B", "P", "Menu"}, // MENU
+  {"400401004C4D", "N", "1EE139C6"}, // mute (speaker)
+  {"400401004E4F", "P", "B"}, // B
+  {"400401005253", "P", "Up"}, // UP
+  {"400401006869", "P", "7"}, // 7
+  {"400401007273", "P", "Left"}, // LEFT
+  {"400401008485", "N", "1EE1F807"}, // vol down (speaker)
+  {"400401008889", "P", "2"}, // 2
+  {"400401008C8D", "P", "Surround"}, // SURROUND
+  {"400401008E8F", "P", "G"}, // G
+  {"400401009293", "P", "OK"}, // OK
+  {"400401009899", "P", "0"}, // 0
+  {"400401009C9D", "P", "Info"}, // INFO
+  {"40040100A0A1", "N", "C12F15EA"}, // INPUT = HDMI 2 = Computer (press twice)
+  {"40040100A8A9", "P", "6"}, // 6
+  {"40040100ACAD", "V", "volume&volume=minus"}, // CH down = vol down (Volumio)
+  {"40040100B9B8", "P", "CC"}, // CC
+  {"40040100BCBD", "W", ""}, // power
+  {"40040100C8C9", "P", "4"}, // 4
+  {"40040100CCCD", "P", "SAP"}, // SAP
+  {"40040100CECF", "P", "Y"}, // Y
+  {"40040100D2D3", "P", "Down"}, // DOWN
+  {"40040100E8E9", "P", "8"}, // 8
+  {"40040100ECED", "N", "1EE1946B"}, // LAST = switch to bluetooth
+  {"40040100F0F1", "P", "Sleep"}, // SLEEP
+  {"40040100F2F3", "P", "Right"}, // RIGHT
+  {"400401207B5A", "P", "Format"}, // FORMAT
+  {"400401900392", "V", "play"}, // play
+  {"400401900B9A", "P", "10"}, // -/#
+  {"400401903BAA", "V", "prev"}, // prev
+  {"4004019043D2", "V", "stop"}, // stop
+  {"400401904FDE", "P", "11"}, // Netflix
+  {"4004019059C8", "N", "C12F857A"}, // EXIT = off projector (press twice)
+  {"4004019075E4", "P", "Favorite"}, // FAVORITE
+  {"400401908312", "V", "pause"}, // pause
+  {"40040190A938", "P", "Home"}, // HOME
+  {"40040190BB2A", "V", "next"}, // next
+  {"40040190D544", "N", "1EE152AD"}, // Media player = switch to HDMI
+  {"40040190E574", "P", "Option"}, // OPTION
+  {"40040190F160", "N", "C12FE51A"}, // APPS = HDMI 1 = Nexus 5 (press twice)
+  {"FF02FD", "V", "toggle"}, // play / pause
+  {"FF10EF", "P", "4"}, // 4
+  {"FF18E7", "P", "2"}, // 2
+  {"FF22DD", "V", "prev"}, // prev
+  {"FF30CF", "P", "1"}, // 1
+  {"FF38C7", "P", "5"}, // 5
+  {"FF42BD", "P", "7"}, // 7
+  {"FF4AB5", "P", "8"}, // 8
+  {"FF52AD", "P", "9"}, // 9
+  {"FF5AA5", "P", "6"}, // 6
+  {"FF629D", "N", "1EE17887"}, // vol up (speaker)
+  {"FF6897", "P", "0"}, // 0
+  {"FF7A85", "P", "3"}, // 3
+  {"FF906F", "V", "volume&volume=plus"}, // vol up (volumio)
+  {"FF9867", "P", "10"}, // EQ
+  {"FFA25D", "W", ""}, // power on / off speaker
+  {"FFA857", "N", "1EE1F807"}, // vol down (speaker)
+  {"FFB04F", "P", "11"}, // ST / REPT
+  {"FFC23D", "V", "next"}, // next
+  {"FFE01F", "V", "volume&volume=minus"}, // vol down (volumio)
+  {"FFE21D", "N", "1EE1946B"} // FUNC / Stop = switch to bluetooth
 };
-// IR codes for 0-9; EQ = 10 and ST/REPT = 11 doing linear search
-const char *playlistIRCode[] = {
-  "FF6897", // 0
-  "FF30CF", // 1
-  "FF18E7", // 2
-  "FF7A85", // 3
-  "FF10EF", // 4
-  "FF38C7", // 5
-  "FF5AA5", // 6
-  "FF42BD", // 7
-  "FF4AB5", // 8
-  "FF52AD", // 9
-  "FF9867", // EQ
-  "FFB04F"  // ST / REPT
-};
-const char *volumioIRCode[] = {
-  "FF02FD", // play / pause
-  "FF22DD", // prev
-  "FFC23D", // next
-  "FFE01F", // vol down (volumio)
-  "FF906F"  // vol up (volumio)
-};
-char *volumioCommand[] = {
-  "toggle", // play / pause
-  "prev",   // prev
-  "next",   // next
-  "volume&volume=minus", // vol down (volumio)
-  "volume&volume=plus"   // vol up (volumio)
-};
-const char *speakerIRCodeIn[] = {
-  "FF629D", // vol up (speaker)
-  "FFA857", // vol down (speaker)
-  "FFE21D"  // FUNC / Stop = switch to bluetooth
-};
-const char *speakerIRCodeOut[] = {
-  "1EE17887", // vol up (speaker)
-  "1EE1F807", // vol down (speaker)
-  "1EE1946B"  // FUNC / Stop = switch to bluetooth
-};
-const char speakerPowerOnIn[7] = "FFA25D";     // power on / off speaker
+const int listSize = sizeof(codeAction) / sizeof(codeAction[0]);
 const char speakerPowerOnOut[9] = "1EE133CC";  // power on / off speaker
 const char speakerHDMIOut[9] = "1EE152AD";     // to switch to HDMI
 // End Customized code
@@ -1683,28 +1677,44 @@ void loop() {
     last_recv.timestamp = timeClient.getEpochTime();               // Set the new update time
     last_recv.valid = true;
     // Customized code
-    // some optimization...
-    // if (last_recv.data
-    // linear search...
-    for (int i = 0; i < sizeof(playlistIRCode) / sizeof(char *); i++) {
-      if (strncmp(last_recv.data, playlistIRCode[i], 40) == 0) {
-        sendVolumio(volumioPlaylistCmd + i);
+
+    int l = 0; int r = listSize; // inclusive-exclusive
+    int m;
+    bool found = false;
+    // binary search
+    while (l < r && !found) {
+      m = (l + r) / 2;
+      int cmp = strncmp(last_recv.data, codeAction[m][CODE], 40);
+      if (cmp == 0) {
+        found = true; // m contains the index
+      } else if (cmp < 0) { // go to left side
+        r = m; // exclusive so will not consider m again
+      } else { // go to right side
+        l = m + 1; // inclusive so start with m + 1
       }
     }
-    for (int i = 0; i < sizeof(volumioCommand) / sizeof(char *); i++) {
-      if (strncmp(last_recv.data, volumioIRCode[i], 40) == 0) {
-        sendVolumio(volumioCommand[i]);
+    if (found) {
+      switch (codeAction[m][ACTION][0]) {
+        case 'P': // play playlist
+          sendVolumio(volumioPlaylistCmd + codeAction[m][DETAILS]);
+          break;
+        case 'N': // Fire IR in NEC format
+          irblast("NEC", codeAction[m][DETAILS], 32, 1000, 1, 100, 1, 0, irsend3); // 0 = use defaults; hard code a bunch here
+          break;
+        case 'V': // Volumio command
+          sendVolumio(codeAction[m][DETAILS]);
+          break;
+        case 'W': // power on/off sequence
+          irblast("NEC", speakerPowerOnOut, 32, 1000, 1, 100, 1, 0, irsend3); // 0 = use defaults; hard code a bunch here
+          delay(3000); // wait 3 seconds
+          irblast("NEC", speakerHDMIOut, 32, 1000, 1, 100, 1, 0, irsend3); // 0 = use defaults; hard code a bunch here
+          break;
       }
-    }
-    for (int i = 0; i < sizeof(speakerIRCodeIn) / sizeof(char *); i++) {
-      if (strncmp(last_recv.data, speakerIRCodeIn[i], 40) == 0) {
-        irblast("NEC", speakerIRCodeOut[i], 32, 1000, 1, 100, 1, 0, irsend3); // 0 = use defaults; hard code a bunch here
-      }
-    }
-    if (strncmp(last_recv.data, speakerPowerOnIn, 40) == 0) {
-      irblast("NEC", speakerPowerOnOut, 32, 1000, 1, 100, 1, 0, irsend3); // 0 = use defaults; hard code a bunch here
-      delay(3000); // wait 3 seconds
-      irblast("NEC", speakerHDMIOut, 32, 1000, 1, 100, 1, 0, irsend3); // 0 = use defaults; hard code a bunch here
+      // blink one more time to indicate it's a known code
+      digitalWrite(ledpin, LOW); // Turn on LED
+      delay(500); // wait 0.5 seconds
+      digitalWrite(ledpin, HIGH); // Turn off LED
+      delay(500); // wait 0.5 seconds
     }
     // End Customized code
     Serial.println("");                                           // Blank line between entries
