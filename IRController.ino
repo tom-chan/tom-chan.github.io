@@ -37,6 +37,7 @@ const int pins4 = 13;                                         // Transmitting pr
 const int configpin = 10;                                     // Reset Pin
 
 // Customized code
+const int buzzerpin = 1;                                      // buzzer pin
 String volumioServer = "http://192.168.123.100/api/v1/commands/?cmd="; // with http prefix and ends with cmd=
 String volumioPlaylistCmd = "playplaylist&name=Playlist";     // n=[0..9] to be appended
 
@@ -58,9 +59,9 @@ const char *codeAction[][3] = {
   {"400401000E0F", "P", "R"}, // R
   {"400401001819", "P", "9"}, // 9
   {"400401002829", "P", "5"}, // 5
-  {"400401002B2A", "V", "repeat&toggle"}, // return = repeat
+  {"400401002B2A", "V", "repeat&true"}, // return = repeat on
   {"400401002C2D", "V", "volume&volume=plus"}, // CH up = vol up (Volumio)
-  {"400401003534", "V", "random&toggle"}, // eHelp = shuffle
+  {"400401003534", "V", "random&true"}, // eHelp = shuffle on
   {"400401004849", "P", "3"}, // 3
   {"400401004A4B", "P", "Menu"}, // MENU
   {"400401004C4D", "N", "1EE139C6"}, // mute (speaker)
@@ -81,11 +82,11 @@ const char *codeAction[][3] = {
   {"40040100B9B8", "P", "CC"}, // CC
   {"40040100BCBD", "W", ""}, // power
   {"40040100C8C9", "P", "4"}, // 4
-  {"40040100CCCD", "P", "SAP"}, // SAP
+  {"40040100CCCD", "N", "1EE1946B"}, // SAP = switch to bluetooth
   {"40040100CECF", "P", "Y"}, // Y
   {"40040100D2D3", "P", "Down"}, // DOWN
   {"40040100E8E9", "P", "8"}, // 8
-  {"40040100ECED", "N", "1EE1946B"}, // LAST = switch to bluetooth
+  {"40040100ECED", "V", "random&false"}, // LAST = shuffle off
   {"40040100F0F1", "P", "Sleep"}, // SLEEP
   {"40040100F2F3", "P", "Right"}, // RIGHT
   {"400401207B5A", "P", "Format"}, // FORMAT
@@ -100,7 +101,7 @@ const char *codeAction[][3] = {
   {"40040190A938", "P", "Home"}, // HOME
   {"40040190BB2A", "V", "next"}, // next
   {"40040190D544", "N", "1EE152AD"}, // Media player = switch to HDMI
-  {"40040190E574", "P", "Option"}, // OPTION
+  {"40040190E574", "V", "repeat&false"}, // OPTION = repeat off
   {"40040190F160", "N", "C12FE51A"}, // APPS = HDMI 1 = Nexus 5 (press twice)
   {"FF02FD", "V", "toggle"}, // play / pause
   {"FF10EF", "P", "4"}, // 4
@@ -608,6 +609,10 @@ void setup() {
 
   // set led pin as output
   pinMode(ledpin, OUTPUT);
+  // Customized code
+  pinMode(buzzerpin, OUTPUT);
+  digitalWrite(buzzerpin, HIGH); // buzzer off
+  // End Customized code
 
   Serial.println("");
   Serial.println("ESP8266 IR Controller");
@@ -1694,8 +1699,11 @@ void loop() {
       }
     }
     if (found) {
+      digitalWrite(buzzerpin, LOW); // Turn on buzzer
       switch (codeAction[m][ACTION][0]) {
-        case 'P': // play playlist
+        case 'P': // play playlist; command takes longer so buzz first then send command
+          delay(300); // wait 0.3 seconds
+          digitalWrite(buzzerpin, HIGH); // Turn off buzzer
           sendVolumio(volumioPlaylistCmd + codeAction[m][DETAILS]);
           break;
         case 'N': // Fire IR in NEC format
@@ -1706,15 +1714,13 @@ void loop() {
           break;
         case 'W': // power on/off sequence
           irblast("NEC", speakerPowerOnOut, 32, 1000, 1, 100, 1, 0, irsend3); // 0 = use defaults; hard code a bunch here
+          digitalWrite(buzzerpin, HIGH); // Turn off buzzer - no need to buzz 3 seconds long
           delay(3000); // wait 3 seconds
+          digitalWrite(buzzerpin, LOW); // Turn on buzzer - buzz twice for power on / off
           irblast("NEC", speakerHDMIOut, 32, 1000, 1, 100, 1, 0, irsend3); // 0 = use defaults; hard code a bunch here
           break;
       }
-      // blink one more time to indicate it's a known code
-      digitalWrite(ledpin, LOW); // Turn on LED
-      delay(500); // wait 0.5 seconds
-      digitalWrite(ledpin, HIGH); // Turn off LED
-      delay(500); // wait 0.5 seconds
+      digitalWrite(buzzerpin, HIGH); // Turn off buzzer
     }
     // End Customized code
     Serial.println("");                                           // Blank line between entries
