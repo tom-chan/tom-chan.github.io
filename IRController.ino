@@ -50,18 +50,20 @@ String volumioPlaylistCmd = "playplaylist&name=Playlist";     // n=[0..9] to be 
 // "N" -- fire IR of type "NEC"
 // "V" -- volumio command other than play playlist
 // "W" -- power on / off sequence = power + 3s delay + switch to HDMI
+// "B" -- power on / off sequence = power + 3s delay + switch to Bluetooth
 const int CODE = 0;
 const int ACTION = 1;
 const int DETAILS = 2;
 const char *codeAction[][3] = {
+  {"290", "N", "1EE139C6"}, // mute (speaker) from Sony remote
   {"400401000405", "N", "1EE17887"}, // vol up (speaker)
   {"400401000809", "P", "1"}, // 1
   {"400401000E0F", "P", "R"}, // R
   {"400401001819", "P", "9"}, // 9
   {"400401002829", "P", "5"}, // 5
-  {"400401002B2A", "V", "repeat&true"}, // return = repeat on
+  {"400401002B2A", "V", "repeat&value=true"}, // return = repeat on
   {"400401002C2D", "V", "volume&volume=plus"}, // CH up = vol up (Volumio)
-  {"400401003534", "V", "random&true"}, // eHelp = shuffle on
+  {"400401003534", "V", "random&value=true"}, // eHelp = shuffle on
   {"400401004849", "P", "3"}, // 3
   {"400401004A4B", "P", "Menu"}, // MENU
   {"400401004C4D", "N", "1EE139C6"}, // mute (speaker)
@@ -76,7 +78,7 @@ const char *codeAction[][3] = {
   {"400401009293", "P", "OK"}, // OK
   {"400401009899", "P", "0"}, // 0
   {"400401009C9D", "P", "Info"}, // INFO
-  {"40040100A0A1", "N", "C12F15EA"}, // INPUT = HDMI 2 = Computer (press twice)
+  {"40040100A0A1", "P", "Input"}, // INPUT
   {"40040100A8A9", "P", "6"}, // 6
   {"40040100ACAD", "V", "volume&volume=minus"}, // CH down = vol down (Volumio)
   {"40040100B9B8", "P", "CC"}, // CC
@@ -86,7 +88,7 @@ const char *codeAction[][3] = {
   {"40040100CECF", "P", "Y"}, // Y
   {"40040100D2D3", "P", "Down"}, // DOWN
   {"40040100E8E9", "P", "8"}, // 8
-  {"40040100ECED", "V", "random&false"}, // LAST = shuffle off
+  {"40040100ECED", "V", "random&value=false"}, // LAST = shuffle off
   {"40040100F0F1", "P", "Sleep"}, // SLEEP
   {"40040100F2F3", "P", "Right"}, // RIGHT
   {"400401207B5A", "P", "Format"}, // FORMAT
@@ -101,8 +103,11 @@ const char *codeAction[][3] = {
   {"40040190A938", "P", "Home"}, // HOME
   {"40040190BB2A", "V", "next"}, // next
   {"40040190D544", "N", "1EE152AD"}, // Media player = switch to HDMI
-  {"40040190E574", "V", "repeat&false"}, // OPTION = repeat off
-  {"40040190F160", "N", "C12FE51A"}, // APPS = HDMI 1 = Nexus 5 (press twice)
+  {"40040190E574", "V", "repeat&value=false"}, // OPTION = repeat off
+  {"40040190F160", "P", "Apps"}, // APPS
+  {"490", "N", "1EE17887"}, // vol up (speaker) from Sony remote
+  {"A90", "B", ""}, // power from Sony remote, switch to Bluetooth
+  {"C90", "N", "1EE1F807"}, // vol down (speaker) from Sony remote
   {"FF02FD", "V", "toggle"}, // play / pause
   {"FF10EF", "P", "4"}, // 4
   {"FF18E7", "P", "2"}, // 2
@@ -126,8 +131,9 @@ const char *codeAction[][3] = {
   {"FFE21D", "N", "1EE1946B"} // FUNC / Stop = switch to bluetooth
 };
 const int listSize = sizeof(codeAction) / sizeof(codeAction[0]);
-const char speakerPowerOnOut[9] = "1EE133CC";  // power on / off speaker
-const char speakerHDMIOut[9] = "1EE152AD";     // to switch to HDMI
+const char speakerPowerOnOut[9] = "1EE133CC";   // power on / off speaker
+const char speakerHDMIOut[9] = "1EE152AD";      // switch to HDMI
+const char speakerBluetoothOut[9] = "1EE1946B"; // switch to Bluetooth
 // End Customized code
 
 // User settings are above here
@@ -682,13 +688,13 @@ void setup() {
     DynamicJsonBuffer jsonBuffer;
     JsonArray& root = jsonBuffer.parseArray(server->arg("plain"));
 
-    int simple = 0;
+    int simple = 1; // Customized code: 0 -> 1
     if (server->hasArg("simple")) simple = server->arg("simple").toInt();
     String signature = server->arg("auth");
     String epid = server->arg("epid");
     String mid = server->arg("mid");
     String timestamp = server->arg("time");
-    int out = (server->hasArg("out")) ? server->arg("out").toInt() : 1;
+    int out = (server->hasArg("out")) ? server->arg("out").toInt() : 3; // Customized code: 1 -> 3
 
     if (!root.success()) {
       Serial.println("JSON parsing failed");
@@ -820,7 +826,7 @@ void setup() {
   server->on("/msg", []() {
     Serial.println("Connection received - MSG");
 
-    int simple = 0;
+    int simple = 1; // Customized code: 0 -> 1
     if (server->hasArg("simple")) simple = server->arg("simple").toInt();
     String signature = server->arg("auth");
     String epid = server->arg("epid");
@@ -882,7 +888,7 @@ void setup() {
       int pulse = (server->hasArg("pulse")) ? server->arg("pulse").toInt() : 1;
       int pdelay = (server->hasArg("pdelay")) ? server->arg("pdelay").toInt() : 100;
       int repeat = (server->hasArg("repeat")) ? server->arg("repeat").toInt() : 1;
-      int out = (server->hasArg("out")) ? server->arg("out").toInt() : 1;
+      int out = (server->hasArg("out")) ? server->arg("out").toInt() : 3; // Customized code: 1 -> 3
       if (server->hasArg("code")) {
         String code = server->arg("code");
         char separator = ':';
@@ -890,6 +896,25 @@ void setup() {
         type = getValue(code, separator, 1);
         len = getValue(code, separator, 2).toInt();
       }
+      // Customized code
+      if (server->hasArg("op")) {
+        String code = server->arg("op");
+        char op = code.charAt(0);
+        switch (op) {
+          case 'u': case 'U': data = "1EE17887"; break; // vol up
+          case 'd': case 'D': data = "1EE1F807"; break; // vol down
+          case 'm': case 'M': data = "1EE139C6"; break; // mute
+          case 'h': case 'H': data = "1EE152AD"; break; // hdmi
+          case 'b': case 'B': data = "1EE1946B"; break; // bluetooth
+          case 'p': case 'P': data = "1EE133CC"; break; // power on / off
+          case 'a': case 'A': data = "1EE18B74"; break; // AUX in
+          default: data = "12345678"; break; // invalid code; do nothing
+        }
+        // type and len fixed for speaker commands, hardcoding them
+        type = "NEC";
+        len = 32;
+      }
+      // End Customized code
 
       if (simple) {
         server->send(200, "text/html", "Success, code sent");
@@ -1712,12 +1737,19 @@ void loop() {
         case 'V': // Volumio command
           sendVolumio(codeAction[m][DETAILS]);
           break;
-        case 'W': // power on/off sequence
+        case 'W': // power on/off sequence + HDMI
           irblast("NEC", speakerPowerOnOut, 32, 1000, 1, 100, 1, 0, irsend3); // 0 = use defaults; hard code a bunch here
           digitalWrite(buzzerpin, HIGH); // Turn off buzzer - no need to buzz 3 seconds long
           delay(3000); // wait 3 seconds
           digitalWrite(buzzerpin, LOW); // Turn on buzzer - buzz twice for power on / off
           irblast("NEC", speakerHDMIOut, 32, 1000, 1, 100, 1, 0, irsend3); // 0 = use defaults; hard code a bunch here
+          break;
+        case 'B': // power on/off sequence + Bluetooth
+          irblast("NEC", speakerPowerOnOut, 32, 1000, 1, 100, 1, 0, irsend3); // 0 = use defaults; hard code a bunch here
+          digitalWrite(buzzerpin, HIGH); // Turn off buzzer - no need to buzz 3 seconds long
+          delay(3000); // wait 3 seconds
+          digitalWrite(buzzerpin, LOW); // Turn on buzzer - buzz twice for power on / off
+          irblast("NEC", speakerBluetoothOut, 32, 1000, 1, 100, 1, 0, irsend3); // 0 = use defaults; hard code a bunch here
           break;
       }
       digitalWrite(buzzerpin, HIGH); // Turn off buzzer
