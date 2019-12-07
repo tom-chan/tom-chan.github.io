@@ -908,6 +908,9 @@ void setup() {
           case 'b': case 'B': data = "1EE1946B"; break; // bluetooth
           case 'p': case 'P': data = "1EE133CC"; break; // power on / off
           case 'a': case 'A': data = "1EE18B74"; break; // AUX in
+          case 'o': case 'O': data = "C12F41BE"; break; // Turn on monitor
+          case 'f': case 'F': data = "C12FA15E"; break; // Turn off monitor
+          case 'l': case 'L': data = "C12F619E"; break; // Dimmer
           default: data = "12345678"; break; // invalid code; do nothing
         }
         // type and len fixed for speaker commands, hardcoding them
