@@ -49,6 +49,104 @@ const int RECV_PIN = 7;
 IRrecv irrecv(RECV_PIN);
 decode_results results;
 
+byte custChars[8][8] = {
+  { // 0
+    B11000,
+    B11000,
+    B11000,
+    B11000,
+    B11000,
+    B11000,
+    B11000,
+    B11000,
+  },
+  { // 1
+    B11111,
+    B11111,
+    B11000,
+    B11000,
+    B11000,
+    B11000,
+    B11000,
+    B11000,
+  },
+  { // 2
+    B11000,
+    B11000,
+    B11000,
+    B11000,
+    B11000,
+    B11000,
+    B11111,
+    B11111,
+  },
+  { // 3
+    B11111,
+    B11111,
+    B11000,
+    B11000,
+    B11000,
+    B11000,
+    B11111,
+    B11111,
+  },
+  { // 4
+    B11111,
+    B11111,
+    B00000,
+    B00000,
+    B00000,
+    B00000,
+    B00000,
+    B00000,
+  },
+  { // 5
+    B11111,
+    B11111,
+    B00000,
+    B00000,
+    B00000,
+    B00000,
+    B11111,
+    B11111,
+  },
+  { // 6
+    B00000,
+    B00000,
+    B00000,
+    B00000,
+    B00000,
+    B00000,
+    B11111,
+    B11111,
+  },
+  { // 7
+    B11000,
+    B11000,
+    B00000,
+    B00000,
+    B00000,
+    B00000,
+    B11000,
+    B11000,
+  },
+};
+
+// TL, TR, BL, BR
+const byte B = 32; // " "
+const byte digits[10][4] = {
+  {1, 0, 2, 0}, // 0
+  {B, 0, B, 0}, // 1
+  {4, 0, 3, 7}, // 2
+  {5, 0, 6, 0}, // 3
+  {2, 0, B, 0}, // 4
+  {3, 7, 6, 0}, // 5
+  {3, 7, 2, 0}, // 6
+  {4, 0, B, 0}, // 7
+  {3, 0, 2, 0}, // 8
+  {3, 0, 6, 0}  // 9
+};
+
 void setup() {
   // initialize serial communication: Serial.begin(9600);
   pinMode(pingPin, OUTPUT);
@@ -59,6 +157,9 @@ void setup() {
 
   // set up the LCD's number of columns and rows:
   lcd.begin(16, 2);
+  for (int i = 0; i < 8; i++) {
+    lcd.createChar(i, custChars[i]);
+  }
   irrecv.enableIRIn();
 }
 
@@ -84,10 +185,8 @@ void loop() {
   inches = microsecondsToInches(duration);
   // cm = microsecondsToCentimeters(duration);
 
-  // clear screen for the next loop:
-  //  lcd.clear();
-  lcd.print("Dist  Cntdn:");
-  lcd.setCursor(0, 1); // next line
+  lcd.setCursor(12, 1);
+  lcd.print("))");
   if (inches > 99) {
     lcd.print("99");
   } else if (inches <= 9) {
@@ -96,13 +195,8 @@ void loop() {
   } else {
     lcd.print(inches);
   }
-  lcd.print("in");
 
   if (irrecv.decode(&results)){
-    lcd.setCursor(8, 1);
-    lcd.println(results.value, HEX);
-    irrecv.resume();
-
     switch (results.value) {
       /* Increase countdown */
       case 0x9CB47: // Sony Up
@@ -147,10 +241,19 @@ void loop() {
           backlight = alwaysOn;
         }
         break;
-      default:
-        
+      default: // take the lower 6 hex and print as YYMMDD
+        byte valid = 1;
+        for (int i = 5; i >= 0; i--) {
+          byte hexDigit = (results.value >> (i*4)) & 0xF;
+          if (hexDigit > 0x9) { // not a digit, pass
+            valid = 0;
+          }
+        }
+        if (valid) printDate(results.value);
         break;
     }
+
+    irrecv.resume();
   }
 
 
@@ -238,5 +341,21 @@ void backlightDec() {
         digitalWrite(ledPin, LOW); // turn backlight off
       }
     }
+  }
+}
+
+void printDate(long date) {
+  backlightOn();
+  lcd.setCursor(0, 0); // use write not print below
+  for (int i = 5; i >= 0; i--) {
+    byte hexDigit = (date >> (i*4)) & 0xF;
+    lcd.write(digits[hexDigit][0]);
+    lcd.write(digits[hexDigit][1]);
+  }
+  lcd.setCursor(0, 1); // next line
+  for (int i = 5; i >= 0; i--) {
+    byte hexDigit = (date >> (i*4)) & 0xF;
+    lcd.write(digits[hexDigit][2]);
+    lcd.write(digits[hexDigit][3]);
   }
 }
