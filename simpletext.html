@@ -2,9 +2,13 @@
 <html>
 <body onload="startTime()">
 <style>
-#txt {
+#time {
   font-family: verdana;
   font-size: 440px;
+}
+#date {
+  font-family: verdana;
+  font-size: 180px;
 }
 </style>
 <script>
@@ -13,25 +17,28 @@ function startTime() {
   var now = new Date();
   var h = now.getHours();
   var m = now.getMinutes();
-  h = checkTime(h);
-  m = checkTime(m);
-  document.getElementById('txt').innerHTML =
+  h = zeroPad(h);
+  m = zeroPad(m);
+  document.getElementById('time').innerHTML =
     h + "" + m;
+  document.getElementById('date').innerHTML =
+    now.getFullYear() + "/" + zeroPad(now.getMonth() + 1) + "/"+ zeroPad(now.getDate());
   // load weather at 4am or on page load
-  if (first || (h == 4 && m == 0)) {
+  /* if (first || (m % 30 == 0)) {
     first = 0;
     document.getElementById('weather').innerHTML = "<iframe src='weather.html'></iframe>";
-  }
+  } */
   var t = setTimeout(startTime, 60000);
 }
 
-function checkTime(i) {
+function zeroPad(i) {
   if (i < 10) {i = "0" + i};  // add zero in front of numbers < 10
   return i;
 }
 </script>
-<div id="txt"></div>
-<div id="weather"></div>
+<div id="time"></div>
+<div id="date"></div>
+<!-- <div id="weather"></div> -->
 </body>
 </html>
 

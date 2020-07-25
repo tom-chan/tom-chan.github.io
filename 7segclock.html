@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html>
+<body>
+
+<canvas id="canvas" width="1000" height="700"
+style="background-color:#FFF">
+</canvas>
+
+<script>
+var canvas = document.getElementById("canvas");
+var ctx = canvas.getContext("2d");
+var lastDrawnMinute = -1;
+drawClock();
+setInterval(drawClock, 5000);
+
+function drawClock() {
+  var now = new Date();
+  var minute = now.getMinutes();
+  if (minute != lastDrawnMinute) {
+    drawFace(ctx);
+    var hour = (now.getHours() % 12);
+    if (hour == 0) hour = 12;
+    drawTime(ctx, hour, minute);
+    lastDrawnMinute = minute;
+  }
+}
+
+function drawFace(ctx) {
+  ctx.fillStyle = 'white';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  ctx.fillStyle = 'black';
+}
+
+function draw7seg(ctx, x, y, n) {
+  // x, y coordinate from top left
+  //  0
+  // 1 2
+  //  3
+  // 4 5
+  //  6
+  var seg = [
+    [1, 1, 1, 0, 1, 1, 1],
+    [0, 0, 1, 0, 0, 1, 0],
+    [1, 0, 1, 1, 1, 0, 1],
+    [1, 0, 1, 1, 0, 1, 1],
+    [0, 1, 1, 1, 0, 1, 0],
+    [1, 1, 0, 1, 0, 1, 1],
+    [1, 1, 0, 1, 1, 1, 1],
+    [1, 0, 1, 0, 0, 1, 0],
+    [1, 1, 1, 1, 1, 1, 1],
+    [1, 1, 1, 1, 0, 1, 1]];
+  if (seg[n][0]) {
+    hseg(ctx, x, y);
+    // ctx.fillRect(x, y, 200, 50);
+  }
+  if (seg[n][1]) {
+    vseg(ctx, x, y);
+    // ctx.fillRect(x, y, 50, 200);
+  }
+  if (seg[n][2]) {
+    vseg(ctx, x+150, y);
+    // ctx.fillRect(x+150, y, 50, 200);
+  }
+  if (seg[n][3]) {
+    hseg(ctx, x, y+150);
+    // ctx.fillRect(x, y+150, 200, 50);
+  }
+  if (seg[n][4]) {
+    vseg(ctx, x, y+150);
+    // ctx.fillRect(x, y+150, 50, 200);
+  }
+  if (seg[n][5]) {
+    vseg(ctx, x+150, y+150);
+    // ctx.fillRect(x+150, y+150, 50, 200);
+  }
+  if (seg[n][6]) {
+    hseg(ctx, x, y+300);
+    // ctx.fillRect(x, y+300, 200, 50);
+  }
+}
+
+function hseg(ctx, x, y) {
+  ctx.beginPath();
+  ctx.moveTo(x+27, y+25);
+  ctx.lineTo(x+52, y);
+  ctx.lineTo(x+148, y);
+  ctx.lineTo(x+173, y+25);
+  ctx.lineTo(x+148, y+50);
+  ctx.lineTo(x+52, y+50);
+  ctx.fill();
+}
+
+function vseg(ctx, x, y) {
+  ctx.beginPath();
+  ctx.moveTo(x+25, y+27);
+  ctx.lineTo(x, y+52);
+  ctx.lineTo(x, y+148);
+  ctx.lineTo(x+25, y+173);
+  ctx.lineTo(x+50, y+148);
+  ctx.lineTo(x+50, y+52);
+  ctx.fill();
+}
+
+function dot(ctx, x, y) {
+  ctx.beginPath();
+  ctx.moveTo(x+15, y);
+  ctx.lineTo(x+35, y);
+  ctx.lineTo(x+50, y+15);
+  ctx.lineTo(x+50, y+35);
+  ctx.lineTo(x+35, y+50);
+  ctx.lineTo(x+15, y+50);
+  ctx.lineTo(x, y+35);
+  ctx.lineTo(x, y+15);
+  ctx.fill();
+}
+
+function drawTime(ctx, hour, minute){
+  ctx.fillStyle = 'black';
+  if (hour >= 10) draw7seg(ctx, -75, 25, 1);
+  draw7seg(ctx, 175, 25, hour % 10);
+  dot(ctx, 425, 100)
+  dot(ctx, 425, 250)
+  draw7seg(ctx, 525, 25, Math.floor(minute / 10));
+  draw7seg(ctx, 775, 25, minute % 10);
+  // ctx.font = "700px Verdana";
+  // hour
+  // hour=hour%12; // 12 hour clock
+  // 0-pad the hour and minute string
+  //ctx.fillText(("0" + hour).slice(-2), 0, 540);
+  // minute
+  //ctx.fillText(("0" + minute).slice(-2), 0, 1130);
+}
+
+</script>
+<p>
+<a href = "htmlclock.html">Round clock</a>
+</body>
+</html>
+
