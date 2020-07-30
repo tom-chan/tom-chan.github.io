@@ -10,6 +10,26 @@ style="background-color:#FFF">
 var canvas = document.getElementById("canvas");
 var ctx = canvas.getContext("2d");
 var lastDrawnMinute = -1;
+var lastDrawnDate = -1;
+// x, y coordinate from top left
+//  0
+// 1 2
+//  3
+// 4 5
+//  6
+var seg = [
+  [1, 1, 1, 0, 1, 1, 1],
+  [0, 0, 1, 0, 0, 1, 0],
+  [1, 0, 1, 1, 1, 0, 1],
+  [1, 0, 1, 1, 0, 1, 1],
+  [0, 1, 1, 1, 0, 1, 0],
+  [1, 1, 0, 1, 0, 1, 1],
+  [1, 1, 0, 1, 1, 1, 1],
+  [1, 0, 1, 0, 0, 1, 0],
+  [1, 1, 1, 1, 1, 1, 1],
+  [1, 1, 1, 1, 0, 1, 1]];
+var monthStr = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+var dayStr = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 drawClock();
 setInterval(drawClock, 5000);
 
@@ -17,65 +37,55 @@ function drawClock() {
   var now = new Date();
   var minute = now.getMinutes();
   if (minute != lastDrawnMinute) {
-    drawFace(ctx);
+    clearTime(ctx);
     var hour = (now.getHours() % 12);
     if (hour == 0) hour = 12;
     drawTime(ctx, hour, minute);
     lastDrawnMinute = minute;
   }
+  var date = now.getDate(); // 1-31
+  if (date != lastDrawnDate) {
+    clearDate(ctx);
+    var month = now.getMonth(); // 0-11 = Jan-Dec
+    var day = now.getDay(); // 0-6 = Sun-Sat
+    drawDate(ctx, month, date, day);
+    lastDrawnDate = date;
+  }
 }
 
-function drawFace(ctx) {
+function clearTime(ctx) {
   ctx.fillStyle = 'white';
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  ctx.fillRect(0, 0, canvas.width, 400);
+  ctx.fillStyle = 'black';
+}
+
+function clearDate(ctx) {
+  ctx.fillStyle = 'white';
+  ctx.fillRect(0, 400, canvas.width, 300);
   ctx.fillStyle = 'black';
 }
 
 function draw7seg(ctx, x, y, n) {
-  // x, y coordinate from top left
-  //  0
-  // 1 2
-  //  3
-  // 4 5
-  //  6
-  var seg = [
-    [1, 1, 1, 0, 1, 1, 1],
-    [0, 0, 1, 0, 0, 1, 0],
-    [1, 0, 1, 1, 1, 0, 1],
-    [1, 0, 1, 1, 0, 1, 1],
-    [0, 1, 1, 1, 0, 1, 0],
-    [1, 1, 0, 1, 0, 1, 1],
-    [1, 1, 0, 1, 1, 1, 1],
-    [1, 0, 1, 0, 0, 1, 0],
-    [1, 1, 1, 1, 1, 1, 1],
-    [1, 1, 1, 1, 0, 1, 1]];
   if (seg[n][0]) {
     hseg(ctx, x, y);
-    // ctx.fillRect(x, y, 200, 50);
   }
   if (seg[n][1]) {
     vseg(ctx, x, y);
-    // ctx.fillRect(x, y, 50, 200);
   }
   if (seg[n][2]) {
     vseg(ctx, x+150, y);
-    // ctx.fillRect(x+150, y, 50, 200);
   }
   if (seg[n][3]) {
     hseg(ctx, x, y+150);
-    // ctx.fillRect(x, y+150, 200, 50);
   }
   if (seg[n][4]) {
     vseg(ctx, x, y+150);
-    // ctx.fillRect(x, y+150, 50, 200);
   }
   if (seg[n][5]) {
     vseg(ctx, x+150, y+150);
-    // ctx.fillRect(x+150, y+150, 50, 200);
   }
   if (seg[n][6]) {
     hseg(ctx, x, y+300);
-    // ctx.fillRect(x, y+300, 200, 50);
   }
 }
 
@@ -122,15 +132,16 @@ function drawTime(ctx, hour, minute){
   dot(ctx, 425, 250)
   draw7seg(ctx, 525, 25, Math.floor(minute / 10));
   draw7seg(ctx, 775, 25, minute % 10);
-  // ctx.font = "700px Verdana";
-  // hour
-  // hour=hour%12; // 12 hour clock
-  // 0-pad the hour and minute string
-  //ctx.fillText(("0" + hour).slice(-2), 0, 540);
-  // minute
-  //ctx.fillText(("0" + minute).slice(-2), 0, 1130);
 }
 
+function drawDate(ctx, month, date, day) {
+  ctx.fillStyle = 'black';
+  ctx.font = "190px Verdana";
+
+  ctx.fillText(monthStr[month], 75, 600);
+  ctx.fillText(date, 370, 600);
+  ctx.fillText(dayStr[day], 630, 600);
+}
 </script>
 <p>
 <a href = "htmlclock.html">Round clock</a>
